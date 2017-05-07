@@ -1,0 +1,78 @@
+\NeedsTeXFormat  {LaTeX2e}
+\ProvidesPackage {abk} [2013/08/19 0.3 for abbreviations]
+\RequirePackage  {xspace, xparse}
+
+%%% Usage
+%%
+%% Example of definition with 3 arguments:
+%%   \newabk{zB}{z.\,B.}{zum~Beispiel}
+%%
+%% Generates two commands: \zB and the capitalized form \ZB for beginning of sentences.
+%% Both commands have a starred version which gives the long form instead of the abbreviation.
+%% \ZB always gives long form, because in german there should be no abbreviations at the beginning of a sentence.
+%%
+%% Generated commands:
+%%   command   output                output starred version (gives long form)
+%%   \zB       z.\,B.\@\xspace       zum~Beispiel\xspace
+%%   \ZB       Zum~Beispiel\xspace   Zum~Beispiel\xspace
+%%
+%%
+%% Example of definition with 2 arguments:
+%%   \newabk{sog}{sog.}
+%%
+%% Generates \sog and the capitalized form \Sog for beginning of sentences.
+%% Both commands have a starred version which gives also the abbreviation.
+%%
+%% Generated commands:
+%%   command   output                output starred version (abbreviated since no long form is given)
+%%   \sog      sog.\@\xspace         sog.\@\xspace
+%%   |Sog      Sog.\@\xspace         Sog.\@\xspace
+%%
+%% Usage:
+%%   Lorem ipsum \zB dolor sit amet ...
+%%   \Sog consectetur
+%%
+%%
+%%% TODO
+%% - Prevent an extra full stop following an abbreviation with trailing period.
+%%
+%%% Changelog
+%%
+%% 2010/06/04 0.1
+%% - initial
+%%
+%% 2013/08/19 0.2
+%% - comments
+%%
+%% 2017/05/07 0.3
+%% - comments
+
+%%% Create commands for user defined abbreviations (Abkürzung)
+%% #1 = mandatory: abbreviation command
+%% #2 = mandatory: abbreviation
+%% #3 = optional: long form
+%%
+\NewDocumentCommand\newabk{mmg}{%
+  \uppercase{\edef\abk@car{\@car#1\@nil}}% \abk@car contains the first letter of #1 in uppercase
+  \edef\abk@cdr{\@cdr#1\@nil}% \abk@cdr contains all but the first letter of #1
+  \edef\abk@cap{\abk@car\abk@cdr}% \abk@cap contains the capitalized abbreviation command
+  %
+  \IfNoValueTF{#3}% if no long form is provided
+  {%
+    \global\@namedef{#1}{\protect\@ifstar% not capitalized command
+      {#2\@\xspace}% starred version: abbreviation
+      {#2\@\xspace}}%
+    \global\@namedef{\abk@cap}{\protect\@ifstar% capitalized command
+      {\MakeUppercase#2\@\xspace}% starred version: capitalized abbreviation (because #2 not in {}, only first letter is upper case)
+      {\MakeUppercase#2\@\xspace}}%
+  }%
+  {%
+    \global\@namedef{#1}{\protect\@ifstar% not capitalized
+      {#3\xspace}% starred version shows long form
+      {#2\@\xspace}}%
+    \global\@namedef{\abk@cap}{\protect\@ifstar% capitalized
+      {\MakeUppercase#3\xspace}% starred version shows long form capitalized
+      {\MakeUppercase#3\xspace}}% not starred version shows long form capitalized,
+    % because at the beginning of sentences abbreviations are not used
+  }%
+}
